@@ -6,7 +6,7 @@ import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.common.xcontent.ToXContentObject;
+import org.wusay.software.owlengine.core.datasource.BaseStoreDataSource;
 
 import java.util.Collection;
 

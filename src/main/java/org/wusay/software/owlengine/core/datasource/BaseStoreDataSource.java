@@ -1,4 +1,4 @@
-package org.wusay.software.owlengine.core;
+package org.wusay.software.owlengine.core.datasource;
 
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.xcontent.ToXContentObject;

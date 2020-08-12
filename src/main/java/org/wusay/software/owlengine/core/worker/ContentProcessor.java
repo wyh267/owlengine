@@ -1,8 +1,8 @@
 package org.wusay.software.owlengine.core.worker;
 
 
-import org.wusay.software.owlengine.core.BaseStoreDataSource;
-import org.wusay.software.owlengine.core.OutputDataSource;
+import org.wusay.software.owlengine.core.datasource.BaseStoreDataSource;
+import org.wusay.software.owlengine.core.datasource.OutputDataSource;
 
 import java.util.List;
 

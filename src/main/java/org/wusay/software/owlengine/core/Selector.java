@@ -3,6 +3,8 @@ package org.wusay.software.owlengine.core;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.wusay.software.owlengine.core.datasource.InputDataSource;
+import org.wusay.software.owlengine.core.datasource.OutputDataSource;
 import org.wusay.software.owlengine.core.worker.ContentProcessor;
 import org.wusay.software.owlengine.core.worker.NextProcessor;
 import org.wusay.software.owlengine.core.worker.Spider;
@@ -26,9 +28,9 @@ public class Selector {
 
 
     public Selector() {
-        spiders = new ArrayList<Spider>();
-        contentProcessors = new ArrayList<ContentProcessor>();
-        nextProcessors = new ArrayList<NextProcessor>();
+        spiders = new ArrayList<>();
+        contentProcessors = new ArrayList<>();
+        nextProcessors = new ArrayList<>();
 
     }
 

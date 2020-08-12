@@ -1,6 +1,8 @@
 package org.wusay.software.owlengine.core;
 
-import org.elasticsearch.common.xcontent.ToXContentObject;
+import org.wusay.software.owlengine.core.datasource.BaseStoreDataSource;
+import org.wusay.software.owlengine.core.datasource.InputDataSource;
+import org.wusay.software.owlengine.core.datasource.OutputDataSource;
 import org.wusay.software.owlengine.core.worker.ContentProcessor;
 import org.wusay.software.owlengine.core.worker.NextProcessor;
 import org.wusay.software.owlengine.core.worker.Spider;

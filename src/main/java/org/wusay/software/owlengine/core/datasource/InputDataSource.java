@@ -1,4 +1,4 @@
-package org.wusay.software.owlengine.core;
+package org.wusay.software.owlengine.core.datasource;
 
 
 import lombok.Getter;
