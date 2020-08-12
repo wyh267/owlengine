@@ -1,5 +1,10 @@
 package org.wusay.software.owlengine.core;
 
+import org.elasticsearch.common.xcontent.ToXContentObject;
+import org.wusay.software.owlengine.core.worker.ContentProcessor;
+import org.wusay.software.owlengine.core.worker.NextProcessor;
+import org.wusay.software.owlengine.core.worker.Spider;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -10,50 +15,63 @@ import java.util.List;
 public class SpiderRunner implements Runnable {
 
 
-    private SpiderSelcetor spiderSelcetor;
-
-    private ProcessorSelector processorSelector;
+    private Selector selector;
 
     private Collection<InputDataSource> inputDataSources;
 
-
     private Collection<InputDataSource> resultInputs;
 
-    public SpiderRunner(SpiderSelcetor spiderSelcetor,
-                        ProcessorSelector processorSelector,
-                        Collection<InputDataSource> inputDataSources) {
-        this.spiderSelcetor = spiderSelcetor;
-        this.processorSelector = processorSelector;
-        this.inputDataSources = inputDataSources;
+    private Collection<BaseStoreDataSource> contents;
 
-        this.resultInputs = new ArrayList<InputDataSource>();
+    private StoreService storeService;
+
+
+    public SpiderRunner(Selector selector,
+                        Collection<InputDataSource> inputDataSources,
+                        StoreService storeService) {
+        this.selector = selector;
+        this.inputDataSources = inputDataSources;
+        this.storeService = storeService;
+
+        this.resultInputs = new ArrayList<>();
+        this.contents = new ArrayList<>();
     }
 
 
     /**
-     * 调度爬虫
+     * 爬取一次
      * @param inputDataSource
      */
-    public List<InputDataSource> scheduler(InputDataSource inputDataSource) {
+    public List<InputDataSource> crawling(InputDataSource inputDataSource) {
 
 
-        Spider spider = spiderSelcetor.selectSpider(inputDataSource);
+        // 爬取
+        Spider spider = selector.selectSpider(inputDataSource);
+        OutputDataSource outputDataSource = spider.getContent(inputDataSource);
 
-        BaseDataSource dataSource = spider.getContent(inputDataSource);
 
-        Processor processor = processorSelector.selectProcessor(dataSource);
+        // 分析
+        ContentProcessor contentProcessor = selector.selectContentProcessor(outputDataSource);
+        List<BaseStoreDataSource> content = contentProcessor.processContent(outputDataSource);
+        contents.addAll(content);
 
-        return processor.processContent(dataSource);
+        // 下一阶段爬取
+        NextProcessor nextProcessor = selector.selectNextProcessor(outputDataSource);
+        return nextProcessor.processNextInput(outputDataSource);
 
     }
 
 
     public void run() {
 
+
         for (InputDataSource input : inputDataSources) {
-            List<InputDataSource> subResult = scheduler(input);
+            List<InputDataSource> subResult = crawling(input);
             resultInputs.addAll(subResult);
         }
+
+        // 存储
+        storeService.storeContent(contents);
 
 
     }

@@ -1,10 +1,11 @@
-package org.wusay.software.owlengine.core;
+package org.wusay.software.owlengine.core.worker;
 
 
-import java.util.List;
+import org.wusay.software.owlengine.core.InputDataSource;
+import org.wusay.software.owlengine.core.OutputDataSource;
 
 /**
- * 爬虫接口
+ * 爬虫接口,负责进行数据爬取
  */
 public interface Spider {
 
@@ -20,7 +21,7 @@ public interface Spider {
      * @param inputDataSource
      * @return
      */
-    BaseDataSource getContent(InputDataSource inputDataSource);
+    OutputDataSource getContent(InputDataSource inputDataSource);
 
 
     /**

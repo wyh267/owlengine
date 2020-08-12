@@ -4,10 +4,10 @@ package org.wusay.software.owlengine.core;
 import lombok.Getter;
 
 /**
- * 基础数据类，保存爬虫爬取的基本信息
+ * 基础数据类，保存爬虫爬取的基本信息,基础信息包含两部分,一部分是url,一部分是原始数据,可以使用自定义数据覆盖
  */
 @Getter
-public abstract class BaseDataSource {
+public class OutputDataSource {
 
     /**
      * 地址
@@ -19,7 +19,7 @@ public abstract class BaseDataSource {
     private String originalContent;
 
 
-    public BaseDataSource(String url, String originalContent) {
+    public OutputDataSource(String url, String originalContent) {
         this.url = url;
         this.originalContent = originalContent;
     }
