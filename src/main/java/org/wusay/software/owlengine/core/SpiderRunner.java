@@ -1,11 +1,13 @@
 package org.wusay.software.owlengine.core;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wusay.software.owlengine.core.datasource.BaseStoreDataSource;
 import org.wusay.software.owlengine.core.datasource.InputDataSource;
 import org.wusay.software.owlengine.core.datasource.OutputDataSource;
-import org.wusay.software.owlengine.core.plugins.LinkHomeSpider;
 import org.wusay.software.owlengine.core.worker.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -15,12 +17,12 @@ import java.util.List;
  */
 public class SpiderRunner implements Runnable {
 
+    private static final Logger logger = LogManager.getLogger(SpiderRunner.class);
 
-    private Selector selector;
 
     private Collection<InputDataSource> inputDataSources;
 
-    private Collection<InputDataSource> resultInputs;
+    private Collection<InputDataSource> nextInputs;
 
     private Collection<BaseStoreDataSource> contents;
 
@@ -31,14 +33,16 @@ public class SpiderRunner implements Runnable {
     private BaseContentProcessor contentProcessor;
 
 
-    public SpiderRunner(Selector selector,
-                        Collection<InputDataSource> inputDataSources,
-                        StoreService storeService) {
-        this.selector = selector;
-        this.inputDataSources = inputDataSources;
+    public SpiderRunner(BaseSpider spider,
+                        BaseContentProcessor processor,
+                        StoreService storeService,
+                        Collection<InputDataSource> inputDataSources) {
+        this.spider = spider;
+        this.contentProcessor = processor;
         this.storeService = storeService;
+        this.inputDataSources = inputDataSources;
 
-        this.resultInputs = new ArrayList<>();
+        this.nextInputs = new ArrayList<>();
         this.contents = new ArrayList<>();
     }
 
@@ -52,13 +56,19 @@ public class SpiderRunner implements Runnable {
 //        LinkHomeSpider likeHomeSpider = new LinkHomeSpider("linkHome");
 //        likeHomeSpider.setNextSpider(null);
 
-        OutputDataSource outputDataSource = spider.getContent(inputDataSource);
+        try {
+            OutputDataSource outputDataSource = spider.getContent(inputDataSource);
 
-        List<BaseStoreDataSource> content =  contentProcessor.process(outputDataSource);
-        contents.addAll(content);
+            List<BaseStoreDataSource> content = contentProcessor.process(outputDataSource);
+            contents.addAll(content);
 
-        List<InputDataSource> nexts = contentProcessor.processNextInput(outputDataSource);
-        resultInputs.addAll(nexts);
+            List<InputDataSource> subNextInputs = contentProcessor.processNextInput(outputDataSource);
+            nextInputs.addAll(subNextInputs);
+
+        }catch (IOException ex) {
+            logger.error("crawling error {}",ex.getMessage());
+            return false;
+        }
 
         return true;
 
@@ -69,12 +79,14 @@ public class SpiderRunner implements Runnable {
 
 
         for (InputDataSource input : inputDataSources) {
-            List<InputDataSource> subResult = crawling(input);
-            resultInputs.addAll(subResult);
+            crawling(input);
         }
 
         // 存储
         storeService.storeContent(contents);
+
+        // 存储后续输入
+        storeService.storeContent(nextInputs);
 
 
     }

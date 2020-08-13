@@ -1,5 +1,8 @@
 package org.wusay.software.owlengine.core.worker;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.wusay.software.owlengine.core.StoreService;
 import org.wusay.software.owlengine.core.datasource.BaseStoreDataSource;
 import org.wusay.software.owlengine.core.datasource.InputDataSource;
 import org.wusay.software.owlengine.core.datasource.OutputDataSource;
@@ -13,11 +16,15 @@ import java.util.List;
  */
 public abstract class BaseContentProcessor {
 
+    protected final Logger logger;
+
+
     private BaseContentProcessor nextContentProcessor;
 
     protected String name;
 
     public BaseContentProcessor(String name) {
+        logger = LogManager.getLogger(getClass());
         this.name = name;
     }
 
@@ -38,7 +45,10 @@ public abstract class BaseContentProcessor {
         List<BaseStoreDataSource> results = new ArrayList<>();
 
         List<BaseStoreDataSource> rs = doProcess(outputDataSource);
-        results.addAll(rs == null ? Collections.EMPTY_LIST : rs);
+        if (rs != null) {
+            logger.info("this processor [ {} ] get [ {} ] contents",name,rs.size());
+            results.addAll(rs);
+        }
 
         if (nextContentProcessor != null) {
             results.addAll(nextContentProcessor.process(outputDataSource));
@@ -67,8 +77,10 @@ public abstract class BaseContentProcessor {
         List<InputDataSource> nextInputs = new ArrayList<>();
 
         List<InputDataSource> ni = doProcessNextInput(outputDataSource);
-
-        nextInputs.addAll(ni == null ? Collections.EMPTY_LIST : ni);
+        if (ni != null) {
+            logger.info("this processor [ {} ] get [ {} ] next input source",name,ni.size());
+            nextInputs.addAll(ni);
+        }
 
         if (nextContentProcessor != null) {
             nextInputs.addAll(nextContentProcessor.processNextInput(outputDataSource));
