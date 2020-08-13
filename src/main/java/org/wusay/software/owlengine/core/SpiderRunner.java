@@ -3,9 +3,8 @@ package org.wusay.software.owlengine.core;
 import org.wusay.software.owlengine.core.datasource.BaseStoreDataSource;
 import org.wusay.software.owlengine.core.datasource.InputDataSource;
 import org.wusay.software.owlengine.core.datasource.OutputDataSource;
-import org.wusay.software.owlengine.core.worker.ContentProcessor;
-import org.wusay.software.owlengine.core.worker.NextProcessor;
-import org.wusay.software.owlengine.core.worker.Spider;
+import org.wusay.software.owlengine.core.plugins.LinkHomeSpider;
+import org.wusay.software.owlengine.core.worker.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,6 +26,10 @@ public class SpiderRunner implements Runnable {
 
     private StoreService storeService;
 
+    private BaseSpider spider;
+
+    private BaseContentProcessor contentProcessor;
+
 
     public SpiderRunner(Selector selector,
                         Collection<InputDataSource> inputDataSources,
@@ -44,22 +47,20 @@ public class SpiderRunner implements Runnable {
      * 爬取一次
      * @param inputDataSource
      */
-    public List<InputDataSource> crawling(InputDataSource inputDataSource) {
+    public boolean crawling(InputDataSource inputDataSource) {
 
+//        LinkHomeSpider likeHomeSpider = new LinkHomeSpider("linkHome");
+//        likeHomeSpider.setNextSpider(null);
 
-        // 爬取
-        Spider spider = selector.selectSpider(inputDataSource);
         OutputDataSource outputDataSource = spider.getContent(inputDataSource);
 
-
-        // 分析
-        ContentProcessor contentProcessor = selector.selectContentProcessor(outputDataSource);
-        List<BaseStoreDataSource> content = contentProcessor.processContent(outputDataSource);
+        List<BaseStoreDataSource> content =  contentProcessor.process(outputDataSource);
         contents.addAll(content);
 
-        // 下一阶段爬取
-        NextProcessor nextProcessor = selector.selectNextProcessor(outputDataSource);
-        return nextProcessor.processNextInput(outputDataSource);
+        List<InputDataSource> nexts = contentProcessor.processNextInput(outputDataSource);
+        resultInputs.addAll(nexts);
+
+        return true;
 
     }
 
